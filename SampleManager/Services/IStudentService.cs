@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static SampleModels.StudentModel;
-
-namespace SampleManager.Services
+﻿namespace SampleManager.Services // Ensure this matches your project structure
 {
-    public interface IStudentService
+    public interface ITaskService
     {
-        IEnumerable<Student> GetAllStudents();
-        Student GetStudentById(int id);
-        void AddStudent(Student student);
-        void UpdateStudent(int id, Student student);
-        void DeleteStudent(int id);
+        IEnumerable<ToDoModels.ToDoTask> GetAllTasks();
+        ToDoModels.ToDoTask? GetTaskById(int id); // Keep nullable return type
+        void AddTask(ToDoModels.ToDoTask newTask);
+        void UpdateTask(int id, ToDoModels.ToDoTask updatedTask);
+        void DeleteTask(int id);
     }
 }

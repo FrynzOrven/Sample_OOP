@@ -1,51 +1,50 @@
 ﻿using SampleManager.Services;
-using static SampleModels.StudentModel;
+using System.Collections.Generic;
+using System.Linq;
+using ToDoModels; // Ensure this matches your project structure
 
 namespace SampleManager.Managers
 {
-    public class StudentManager : IStudentService
+    public class TaskManager : ITaskService
     {
-        //Temporary data for testing before database connections
-        private readonly List<Student> _students = new List<Student>
+        private readonly List<ToDoTask> _todoTaskList = new List<ToDoTask>
         {
-            new Student { Id = 1, FirstName = "John", LastName = "Doe", Course = "Computer Science" },
-            new Student { Id = 2, FirstName = "Jane", LastName = "Smith", Course = "Information Technology" }
+            new ToDoTask { Id = 1, Title = "Complete project", IsCompleted = false },
+            new ToDoTask { Id = 2, Title = "Prepare presentation", IsCompleted = false }
         };
 
-        //Function that displays all students within the list
-        public IEnumerable<Student> GetAllStudents()
+        public IEnumerable<ToDoTask> GetAllTasks()
         {
-            return _students;
+            return _todoTaskList;
         }
-        //Function to display the details of the student if there is a matching Id
-        public Student GetStudentById(int id)
+
+        public ToDoTask? GetTaskById(int id)
         {
-            return _students.FirstOrDefault(s => s.Id == id);
+            return _todoTaskList.FirstOrDefault(t => t.Id == id);
         }
-        //Function that displays adds a students to the list
-        public void AddStudent(Student student)
+
+        public void AddTask(ToDoTask newTask)
         {
-            student.Id = _students.Max(s => s.Id) + 1;
-            _students.Add(student);
+            newTask.Id = _todoTaskList.Any() ? _todoTaskList.Max(t => t.Id) + 1 : 1;
+            _todoTaskList.Add(newTask);
         }
-        //Function that update a student's information if it exists
-        public void UpdateStudent(int id, Student student)
+
+        public void UpdateTask(int id, ToDoTask updatedTask)
         {
-            var existingStudent = _students.FirstOrDefault(s => s.Id == id);
-            if (existingStudent != null)
+            var existingTask = _todoTaskList.FirstOrDefault(t => t.Id == id);
+            if (existingTask != null)
             {
-                existingStudent.FirstName = student.FirstName;
-                existingStudent.LastName = student.LastName;
-                existingStudent.Course = student.Course;
+                existingTask.Title = updatedTask.Title;
+                existingTask.IsCompleted = updatedTask.IsCompleted;
             }
         }
-        //Function that deletes a student from the list
-        public void DeleteStudent(int id)
+
+        public void DeleteTask(int id)
         {
-            var student = _students.FirstOrDefault(s => s.Id == id);
-            if (student != null)
+            var existingTask = _todoTaskList.FirstOrDefault(t => t.Id == id);
+            if (existingTask != null)
             {
-                _students.Remove(student);
+                _todoTaskList.Remove(existingTask);
             }
         }
     }

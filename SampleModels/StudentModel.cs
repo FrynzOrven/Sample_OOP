@@ -1,14 +1,9 @@
-﻿namespace SampleModels
+﻿namespace ToDoModels // Ensure this matches your project structure
 {
-    public class StudentModel
+    public class ToDoTask
     {
-        public class Student
-        {
-            public int Id { get; set; }
-            public string FirstName { get; set; }
-            public string LastName { get; set; }
-            public string Course { get; set; }
-        }
-
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public bool IsCompleted { get; set; }
     }
 }
