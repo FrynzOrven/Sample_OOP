@@ -1,50 +1,128 @@
-﻿using SampleManager.Services;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ToDoModels; // Ensure this matches your project structure
-
-namespace SampleManager.Managers
+namespace StudentManager
 {
-    public class TaskManager : ITaskService
+    // Student class represents a student with properties like ID, Name, Age, and Course
+    public class Student
     {
-        private readonly List<ToDoTask> _todoTaskList = new List<ToDoTask>
-        {
-            new ToDoTask { Id = 1, Title = "Complete project", IsCompleted = false },
-            new ToDoTask { Id = 2, Title = "Prepare presentation", IsCompleted = false }
-        };
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public string Course { get; set; }
 
-        public IEnumerable<ToDoTask> GetAllTasks()
+        // Constructor to initialize student properties
+        public Student(int id, string name, int age, string course)
         {
-            return _todoTaskList;
+            Id = id;
+            Name = name;
+            Age = age;
+            Course = course;
+        }
+    }
+
+    // StudentManager class handles operations on the student list like adding, updating, deleting, and retrieving students
+    public class StudentManager
+    {
+        // Private list to store students
+        private readonly List<Student> _studentList = new List<Student>();
+
+        // Method to get all students
+        public IEnumerable<Student> GetAllStudents()
+        {
+            return _studentList;
         }
 
-        public ToDoTask? GetTaskById(int id)
+        // Method to get a student by their ID
+        public Student GetStudentById(int id)
         {
-            return _todoTaskList.FirstOrDefault(t => t.Id == id);
+            return _studentList.FirstOrDefault(s => s.Id == id);
         }
 
-        public void AddTask(ToDoTask newTask)
+        // Method to add a student to the list
+        public void AddStudent(Student newStudent)
         {
-            newTask.Id = _todoTaskList.Any() ? _todoTaskList.Max(t => t.Id) + 1 : 1;
-            _todoTaskList.Add(newTask);
+            // Automatically set the ID for new students
+            newStudent.Id = _studentList.Any() ? _studentList.Max(s => s.Id) + 1 : 1;
+            _studentList.Add(newStudent);
+            Console.WriteLine($"Student {newStudent.Name} added.");
         }
 
-        public void UpdateTask(int id, ToDoTask updatedTask)
+        // Method to update an existing student's details
+        public void UpdateStudent(int id, Student updatedStudent)
         {
-            var existingTask = _todoTaskList.FirstOrDefault(t => t.Id == id);
-            if (existingTask != null)
+            var existingStudent = _studentList.FirstOrDefault(s => s.Id == id);
+            if (existingStudent != null)
             {
-                existingTask.Title = updatedTask.Title;
-                existingTask.IsCompleted = updatedTask.IsCompleted;
+                existingStudent.Name = updatedStudent.Name;
+                existingStudent.Age = updatedStudent.Age;
+                existingStudent.Course = updatedStudent.Course;
+                Console.WriteLine($"Student {id} updated.");
+            }
+            else
+            {
+                Console.WriteLine("Student not found.");
             }
         }
 
-        public void DeleteTask(int id)
+        // Method to delete a student by their ID
+        public void DeleteStudent(int id)
         {
-            var existingTask = _todoTaskList.FirstOrDefault(t => t.Id == id);
-            if (existingTask != null)
+            var student = _studentList.FirstOrDefault(s => s.Id == id);
+            if (student != null)
             {
-                _todoTaskList.Remove(existingTask);
+                _studentList.Remove(student);
+                Console.WriteLine($"Student {id} deleted.");
+            }
+            else
+            {
+                Console.WriteLine("Student not found.");
+            }
+        }
+    }
+
+    // Program class to test the StudentManager functionality
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // Create an instance of StudentManager
+            StudentManager manager = new StudentManager();
+
+            // Create new students
+            Student student1 = new Student(0, "John Doe", 20, "Computer Science");
+            Student student2 = new Student(0, "Jane Smith", 22, "Mathematics");
+
+            // Add students to the list
+            manager.AddStudent(student1);
+            manager.AddStudent(student2);
+
+            // Display all students
+            Console.WriteLine("All Students:");
+            foreach (var student in manager.GetAllStudents())
+            {
+                Console.WriteLine($"ID: {student.Id}, Name: {student.Name}, Age: {student.Age}, Course: {student.Course}");
+            }
+
+            // Update a student's information
+            student1.Name = "Johnathan Doe";
+            manager.UpdateStudent(1, student1);
+
+            // Display updated students
+            Console.WriteLine("\nUpdated Students:");
+            foreach (var student in manager.GetAllStudents())
+            {
+                Console.WriteLine($"ID: {student.Id}, Name: {student.Name}, Age: {student.Age}, Course: {student.Course}");
+            }
+
+            // Delete a student
+            manager.DeleteStudent(1);
+
+            // Display students after deletion
+            Console.WriteLine("\nStudents after deletion:");
+            foreach (var student in manager.GetAllStudents())
+            {
+                Console.WriteLine($"ID: {student.Id}, Name: {student.Name}, Age: {student.Age}, Course: {student.Course}");
             }
         }
     }

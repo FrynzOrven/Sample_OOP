@@ -1,91 +1,50 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SampleManager.Services; // Adjust this based on your actual namespace
-using System.Collections.Generic; // Required for IEnumerable
-using ToDoModels; // Ensure this matches your project structure
+﻿using System;
+using System.Collections.Generic;
 
-namespace ToDoListManager.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-public class TasksController : ControllerBase
+namespace YourNamespace // Make sure this matches the namespace in Program.cs
 {
-    private readonly ITaskService _taskService;
-
-    public TasksController(ITaskService taskService)
+    // Student class
+    public class Student
     {
-        _taskService = taskService;
-    }
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
 
-    [HttpGet]
-    public ActionResult<IEnumerable<TaskItem>> GetTasks() // Changed to TaskItem
-    {
-        var tasks = _taskService.GetAllTasks();
-        if (tasks == null || !tasks.Any())
+        // Constructor to initialize Student object
+        public Student(int id, string name, int age)
         {
-            return NoContent(); // Return 204 No Content if the list is empty
+            Id = id;
+            Name = name;
+            Age = age;
         }
-        return Ok(tasks);
     }
-
-    [HttpGet("{id}")]
-    public ActionResult<TaskItem> GetTask(int id) // Changed to TaskItem
+    // Controller class to manage students
+    public class StudentController
     {
-        var task = _taskService.GetTaskById(id);
-        if (task == null)
-        {
-            return NotFound(new { Message = $"Task with ID {id} not found." });
-        }
-        return Ok(task);
-    }
+        private List<Student> students = new List<Student>();
 
-    [HttpPost]
-    public ActionResult<TaskItem> AddTask([FromBody] TaskItem task) // Changed to TaskItem
-    {
-        if (task == null || string.IsNullOrEmpty(task.Title))
+        // Method to add a student
+        public void AddStudent(Student student)
         {
-            return BadRequest(new { Message = "Task data is invalid." });
+            students.Add(student);
+            Console.WriteLine($"Student {student.Name} added.");
         }
 
-        _taskService.AddTask(task);
-        return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task);
-    }
-
-    [HttpPut("{id}")]
-    public IActionResult UpdateTask(int id, [FromBody] TaskItem task) // Changed to TaskItem
-    {
-        if (task == null || string.IsNullOrEmpty(task.Title))
+        // Method to display all students
+        public void DisplayStudents()
         {
-            return BadRequest(new { Message = "Task data is invalid." });
+            if (students.Count == 0)
+            {
+                Console.WriteLine("No students to display.");
+            }
+            else
+            {
+                Console.WriteLine("Displaying all students:");
+                foreach (var student in students)
+                {
+                    Console.WriteLine($"ID: {student.Id}, Name: {student.Name}, Age: {student.Age}");
+                }
+            }
         }
-
-        var existingTask = _taskService.GetTaskById(id);
-        if (existingTask == null)
-        {
-            return NotFound(new { Message = $"Task with ID {id} not found." });
-        }
-
-        _taskService.UpdateTask(id, existingTask);
-        return NoContent();
     }
-
-    [HttpDelete("{id}")]
-    public IActionResult DeleteTask(int id)
-    {
-        var task = _taskService.GetTaskById(id);
-        if (task == null)
-        {
-            return NotFound(new { Message = $"Task with ID {id} not found." });
-        }
-
-        _taskService.DeleteTask(id);
-        return NoContent();
-    }
-}
-
-// Changed class name to TaskItem
-public class TaskItem
-{
-    public int Id { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public bool IsCompleted { get; set; }
 }
