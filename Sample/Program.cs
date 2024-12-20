@@ -4,113 +4,79 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
-namespace SampleApp
+namespace ShoppingListApp
 {
     // Models
-    public class Student
+    public class Item
     {
         public int Id { get; set; }
         public string Name { get; set; }
-    }
-
-    public class ToDoTask  // Renamed from Task to avoid conflict with System.Threading.Tasks.Task
-    {
-        public int Id { get; set; }
-        public string Description { get; set; }
+        public bool IsPurchased { get; set; } // True if marked as purchased
     }
 
     // Interfaces
-    public interface IStudentService
+    public interface IShoppingListService
     {
-        void AddStudent(Student student);
-        IEnumerable<Student> GetAllStudents();
+        void AddItem(Item item);
+        IEnumerable<Item> GetAllItems();
+        void MarkAsPurchased(int itemId);
     }
 
-    public interface ITaskService
+    // Services (Implementing the interface)
+    public class ShoppingListManager : IShoppingListService
     {
-        void AddTask(ToDoTask task);  // Updated the type to ToDoTask
-        IEnumerable<ToDoTask> GetAllTasks();  // Updated the return type to ToDoTask
-    }
+        private readonly List<Item> _items = new List<Item>();
 
-    // Services (Implementing the interfaces)
-    public class StudentManager : IStudentService
-    {
-        private readonly List<Student> _students = new List<Student>();
-
-        public void AddStudent(Student student)
+        public void AddItem(Item item)
         {
-            _students.Add(student);
+            item.Id = _items.Count + 1; // Auto-increment Id
+            item.IsPurchased = false;   // Default as not purchased
+            _items.Add(item);
         }
 
-        public IEnumerable<Student> GetAllStudents()
+        public IEnumerable<Item> GetAllItems()
         {
-            return _students;
-        }
-    }
-
-    public class TaskManager : ITaskService
-    {
-        private readonly List<ToDoTask> _tasks = new List<ToDoTask>();  // Updated to use ToDoTask
-
-        public void AddTask(ToDoTask task)  // Updated to use ToDoTask
-        {
-            _tasks.Add(task);
+            return _items;
         }
 
-        public IEnumerable<ToDoTask> GetAllTasks()  // Updated to return ToDoTask
+        public void MarkAsPurchased(int itemId)
         {
-            return _tasks;
+            var item = _items.Find(i => i.Id == itemId);
+            if (item != null)
+                item.IsPurchased = true;
         }
     }
 
     // Controllers
     [Route("api/[controller]")]
     [ApiController]
-    public class StudentsController : ControllerBase
+    public class ShoppingListController : ControllerBase
     {
-        private readonly IStudentService _studentService;
+        private readonly IShoppingListService _shoppingListService;
 
-        public StudentsController(IStudentService studentService)
+        public ShoppingListController(IShoppingListService shoppingListService)
         {
-            _studentService = studentService;
+            _shoppingListService = shoppingListService;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Student>> Get()
+        public ActionResult<IEnumerable<Item>> Get()
         {
-            return Ok(_studentService.GetAllStudents());
+            return Ok(_shoppingListService.GetAllItems());
         }
 
         [HttpPost]
-        public ActionResult AddStudent([FromBody] Student student)
+        public ActionResult AddItem([FromBody] Item item)
         {
-            _studentService.AddStudent(student);
-            return CreatedAtAction(nameof(Get), new { id = student.Id }, student);
-        }
-    }
-
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TasksController : ControllerBase
-    {
-        private readonly ITaskService _taskService;
-
-        public TasksController(ITaskService taskService)
-        {
-            _taskService = taskService;
+            _shoppingListService.AddItem(item);
+            return CreatedAtAction(nameof(Get), new { id = item.Id }, item);
         }
 
-        [HttpGet]
-        public ActionResult<IEnumerable<ToDoTask>> Get()  // Updated to return ToDoTask
+        [HttpPut("{itemId}")]
+        public ActionResult MarkAsPurchased(int itemId)
         {
-            return Ok(_taskService.GetAllTasks());
-        }
-
-        [HttpPost]
-        public ActionResult AddTask([FromBody] ToDoTask task)  // Updated to accept ToDoTask
-        {
-            _taskService.AddTask(task);
-            return CreatedAtAction(nameof(Get), new { id = task.Id }, task);
+            _shoppingListService.MarkAsPurchased(itemId);
+            return NoContent();
         }
     }
 
@@ -121,12 +87,11 @@ namespace SampleApp
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Add services to the container
             builder.Services.AddControllers();
 
             // Register services for dependency injection
-            builder.Services.AddTransient<IStudentService, StudentManager>();  // Register StudentManager as implementation for IStudentService
-            builder.Services.AddTransient<ITaskService, TaskManager>();  // Register TaskManager as implementation for ITaskService
+            builder.Services.AddTransient<IShoppingListService, ShoppingListManager>();
 
             // Add Swagger for API documentation
             builder.Services.AddEndpointsApiExplorer();
@@ -134,17 +99,17 @@ namespace SampleApp
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();  // Swagger UI for exploring the API
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
             app.UseAuthorization();
 
-            // Map controllers to routes
+            // Map controllers
             app.MapControllers();
 
             // Run the application

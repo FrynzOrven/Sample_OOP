@@ -1,128 +1,131 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-namespace StudentManager
+
+namespace ShoppingListManager
 {
-    // Student class represents a student with properties like ID, Name, Age, and Course
-    public class Student
+    // Item class represents an item in the shopping list
+    public class Item
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int Age { get; set; }
-        public string Course { get; set; }
+        public bool IsPurchased { get; set; }
 
-        // Constructor to initialize student properties
-        public Student(int id, string name, int age, string course)
+        public Item(int id, string name, bool isPurchased)
         {
             Id = id;
             Name = name;
-            Age = age;
-            Course = course;
+            IsPurchased = isPurchased;
         }
     }
 
-    // StudentManager class handles operations on the student list like adding, updating, deleting, and retrieving students
-    public class StudentManager
+    // ShoppingListManager class handles operations on the shopping list
+    public class ShoppingListManager
     {
-        // Private list to store students
-        private readonly List<Student> _studentList = new List<Student>();
+        private readonly List<Item> _items = new List<Item>();
 
-        // Method to get all students
-        public IEnumerable<Student> GetAllStudents()
+        public IEnumerable<Item> GetAllItems()
         {
-            return _studentList;
+            return _items;
         }
 
-        // Method to get a student by their ID
-        public Student GetStudentById(int id)
+        public Item GetItemById(int id)
         {
-            return _studentList.FirstOrDefault(s => s.Id == id);
+            return _items.FirstOrDefault(i => i.Id == id);
         }
 
-        // Method to add a student to the list
-        public void AddStudent(Student newStudent)
+        public void AddItem(Item newItem)
         {
-            // Automatically set the ID for new students
-            newStudent.Id = _studentList.Any() ? _studentList.Max(s => s.Id) + 1 : 1;
-            _studentList.Add(newStudent);
-            Console.WriteLine($"Student {newStudent.Name} added.");
+            newItem.Id = _items.Any() ? _items.Max(i => i.Id) + 1 : 1; // Auto-increment ID
+            newItem.IsPurchased = false; // Default to not purchased
+            _items.Add(newItem);
+            Console.WriteLine($"Item '{newItem.Name}' added to the shopping list.");
         }
 
-        // Method to update an existing student's details
-        public void UpdateStudent(int id, Student updatedStudent)
+        public void UpdateItem(int id, Item updatedItem)
         {
-            var existingStudent = _studentList.FirstOrDefault(s => s.Id == id);
-            if (existingStudent != null)
+            var existingItem = _items.FirstOrDefault(i => i.Id == id);
+            if (existingItem != null)
             {
-                existingStudent.Name = updatedStudent.Name;
-                existingStudent.Age = updatedStudent.Age;
-                existingStudent.Course = updatedStudent.Course;
-                Console.WriteLine($"Student {id} updated.");
+                existingItem.Name = updatedItem.Name;
+                existingItem.IsPurchased = updatedItem.IsPurchased;
+                Console.WriteLine($"Item {id} updated.");
             }
             else
             {
-                Console.WriteLine("Student not found.");
+                Console.WriteLine("Item not found.");
             }
         }
 
-        // Method to delete a student by their ID
-        public void DeleteStudent(int id)
+        public void MarkAsPurchased(int id)
         {
-            var student = _studentList.FirstOrDefault(s => s.Id == id);
-            if (student != null)
+            var item = _items.FirstOrDefault(i => i.Id == id);
+            if (item != null)
             {
-                _studentList.Remove(student);
-                Console.WriteLine($"Student {id} deleted.");
+                item.IsPurchased = true;
+                Console.WriteLine($"Item '{item.Name}' marked as purchased.");
             }
             else
             {
-                Console.WriteLine("Student not found.");
+                Console.WriteLine("Item not found.");
+            }
+        }
+
+        public void DeleteItem(int id)
+        {
+            var item = _items.FirstOrDefault(i => i.Id == id);
+            if (item != null)
+            {
+                _items.Remove(item);
+                Console.WriteLine($"Item '{item.Name}' deleted from the shopping list.");
+            }
+            else
+            {
+                Console.WriteLine("Item not found.");
             }
         }
     }
 
-    // Program class to test the StudentManager functionality
+    // Program class to test the Shopping List Manager functionality
     class Program
     {
         static void Main(string[] args)
         {
-            // Create an instance of StudentManager
-            StudentManager manager = new StudentManager();
+            ShoppingListManager shoppingListManager = new ShoppingListManager();
 
-            // Create new students
-            Student student1 = new Student(0, "John Doe", 20, "Computer Science");
-            Student student2 = new Student(0, "Jane Smith", 22, "Mathematics");
+            // Add items to the shopping list
+            shoppingListManager.AddItem(new Item(0, "Milk", false));
+            shoppingListManager.AddItem(new Item(0, "Bread", false));
+            shoppingListManager.AddItem(new Item(0, "Eggs", false));
 
-            // Add students to the list
-            manager.AddStudent(student1);
-            manager.AddStudent(student2);
-
-            // Display all students
-            Console.WriteLine("All Students:");
-            foreach (var student in manager.GetAllStudents())
+            // Display all items
+            Console.WriteLine("\nAll Items in the Shopping List:");
+            foreach (var item in shoppingListManager.GetAllItems())
             {
-                Console.WriteLine($"ID: {student.Id}, Name: {student.Name}, Age: {student.Age}, Course: {student.Course}");
+                Console.WriteLine($"ID: {item.Id}, Name: {item.Name}, Purchased: {item.IsPurchased}");
             }
 
-            // Update a student's information
-            student1.Name = "Johnathan Doe";
-            manager.UpdateStudent(1, student1);
+            // Update an item
+            shoppingListManager.UpdateItem(2, new Item(2, "Whole Wheat Bread", false));
 
-            // Display updated students
-            Console.WriteLine("\nUpdated Students:");
-            foreach (var student in manager.GetAllStudents())
+            // Mark an item as purchased
+            shoppingListManager.MarkAsPurchased(3);
+
+            // Display all items after updates
+            Console.WriteLine("\nShopping List After Updates:");
+            foreach (var item in shoppingListManager.GetAllItems())
             {
-                Console.WriteLine($"ID: {student.Id}, Name: {student.Name}, Age: {student.Age}, Course: {student.Course}");
+                Console.WriteLine($"ID: {item.Id}, Name: {item.Name}, Purchased: {item.IsPurchased}");
             }
 
-            // Delete a student
-            manager.DeleteStudent(1);
+            // Delete an item
+            shoppingListManager.DeleteItem(1);
 
-            // Display students after deletion
-            Console.WriteLine("\nStudents after deletion:");
-            foreach (var student in manager.GetAllStudents())
+            // Display all items after deletion
+            Console.WriteLine("\nShopping List After Deletion:");
+            foreach (var item in shoppingListManager.GetAllItems())
             {
-                Console.WriteLine($"ID: {student.Id}, Name: {student.Name}, Age: {student.Age}, Course: {student.Course}");
+                Console.WriteLine($"ID: {item.Id}, Name: {item.Name}, Purchased: {item.IsPurchased}");
             }
         }
     }
